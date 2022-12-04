@@ -1,0 +1,675 @@
+<?php
+if (isset($_GET['id']) && $_GET['id'] > 0) {
+    $qry = $conn->query("SELECT * from `inmate_list` where id = '{$_GET['id']}' ");
+    if ($qry->num_rows > 0) {
+        foreach ($qry->fetch_assoc() as $k => $v) {
+            $$k = $v;
+        }
+    }
+    if (isset($id)) {
+        $crimes = $conn->query("SELECT crime_id from `inmate_crimes` where inmate_id = '{$id}' ");
+        $crime_ids = array_column($crimes->fetch_all(MYSQLI_ASSOC), 'crime_id');
+    }
+}
+
+
+?>
+<style>
+    img#cimg {
+        max-height: 15em;
+        max-width: 100%;
+        object-fit: scale-down;
+    }
+</style>
+<div class="content py-4 bg-gradient-navy px-3">
+    <h4 class="mb-0"><?= isset($id) ? "Update Inmate" : "New Inmate Entry" ?></h4>
+</div>
+<div class="row mt-n4 justify-content-center align-items-center flex-column">
+    <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
+        <div class="card rounded-0 shadow">
+            <div class="card-body">
+                <div class="container-fluid">
+                    <form action="" id="inmate-form">
+                        <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
+                        <div class="row">
+
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label for="cell_id" class="control-label">Prison</label>
+                                    <select class="form-control form-control-sm rounded-0" name="prison_id" id="prison_id" required="required">
+                                        <option value="" <?= !isset($cell_id) ? 'selected' : '' ?>></option>
+                                        <?php
+                                        $prisons = $conn->query("SELECT * FROM prison_list");
+                                        while ($row = $prisons->fetch_assoc()) :
+                                        ?>
+                                            <option value="<?= $row['id'] ?>" <?= isset($cell_id) && $cell_id == $row['id'] ? 'selected' : '' ?>><?= $row['name'] ?></option>
+                                        <?php endwhile; ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cell_id" class="control-label">Cell Block</label>
+                                    <select class="form-control form-control-sm rounded-0" name="cell_id" id="cell_id" required="required">
+                                        <option value="" <?= !isset($cell_id) ? 'selected' : '' ?>></option>
+                                        <?php
+                                        $cells = $conn->query("SELECT * FROM cell_list");
+                                        while ($row = $cells->fetch_assoc()) :
+                                        ?>
+                                            <option value="<?= $row['id'] ?>" <?= isset($cell_id) && $cell_id == $row['id'] ? 'selected' : '' ?>><?= $row['name'] ?></option>
+                                        <?php endwhile; ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label for="code" class="control-label">Code</label>
+                                    <input type="text" class="form-control form-control-sm rounded-0" name="code" id="code" required="required" value="<?= isset($code) ? $code : "" ?>" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label for="firstname" class="control-label">First Name</label>
+                                    <input type="text" class="form-control form-control-sm rounded-0" name="firstname" id="firstname" required="required" value="<?= isset($firstname) ? $firstname : "" ?>">
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label for="middlename" class="control-label">Middle Name</label>
+                                    <input type="text" class="form-control form-control-sm rounded-0" name="middlename" id="middlename" placeholder="optional" value="<?= isset($middlename) ? $middlename : "" ?>">
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label for="lastname" class="control-label">Last Name</label>
+                                    <input type="text" class="form-control form-control-sm rounded-0" name="lastname" id="lastname" required="required" value="<?= isset($lastname) ? $lastname : "" ?>">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label for="dob" class="control-label">Birthday</label>
+                                    <input type="date" class="form-control form-control-sm rounded-0" name="dob" id="dob" required="required" value="<?= isset($dob) ? $dob : "" ?>">
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label for="sex" class="control-label">Sex</label>
+                                    <select class="form-control form-control-sm rounded-0" name="sex" id="sex" required="required">
+                                        <option value="Male" <?= isset($sex) && $sex == 'Male' ? 'selected' : '' ?>>Male</option>
+                                        <option value="Female" <?= isset($sex) && $sex == 'Female' ? 'selected' : '' ?>>Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label for="address" class="control-label">Address</label>
+                                    <textarea rows="3" class="form-control form-control-sm rounded-0" name="address" id="address" required="required"><?= isset($address) ? $address : "" ?></textarea>
+                                </div>
+                            </div>
+                        </div> -->
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label for="marital_status" class="control-label">Marital Status</label>
+                                    <select class="form-control form-control-sm rounded-0" name="marital_status" id="marital_status" required="required">
+                                        <option value="Single" <?= isset($marital_status) && $marital_status == 'Single' ? 'selected' : '' ?>>Single</option>
+                                        <option value="Married" <?= isset($marital_status) && $marital_status == 'Married' ? 'selected' : '' ?>>Married</option>
+                                        <option value="Widower" <?= isset($marital_status) && $marital_status == 'Widower' ? 'selected' : '' ?>>Widower</option>
+                                        <option value="Widow" <?= isset($marital_status) && $marital_status == 'Widow' ? 'selected' : '' ?>>Widow</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label for="country" class="control-label">Country</label>
+                                    <input type="text" class="form-control form-control-sm rounded-0" name="country" id="country" required="required" value="<?= isset($country) ? $country : "" ?>">
+                                </div>
+                            </div>
+                            <div>
+                                <div class="form-group">
+                                    <label for='illness'>Any illnesses</label>
+                                    <input type="checkbox" id="toggle" />
+                                    <div>
+
+                                        <input style="display: none;" type="text" name="illness" id="illness" placeholder="Specify illness" />
+                                    </div>
+                                </div>
+                                <script>
+                                    let checkbox = document.querySelector('#toggle')
+                                    let illness = document.querySelector('#illness')
+
+                                    checkbox.addEventListener('change', getValue)
+
+                                    function getValue(e) {
+                                        if (e.target.checked === true) {
+                                            e.target.value = 'Yes'
+                                            illness.style.display = 'block'
+                                            console.log(e.target.value)
+                                        } else {
+                                            e.target.value = 'No'
+                                            illness.style.display = 'none'
+
+                                            console.log(e.target.value)
+                                        }
+                                    }
+                                </script>
+
+                            </div>
+                        </div>
+                        <div style='display: flex; align-items: center; margin: 0.8rem 0rem;'>
+                            <p style='margin:0rem 0.6rem;'>Is this person on remand?</p>
+                            <input hidden name='status' value='2' id='status-remand' />
+
+                            <input style='cursor: pointer;' type="checkbox" id="remand">
+
+                        </div>
+                        <fieldset style='display: none;' class="border px-2 py-2" id='remand-details'>
+                            <legend class="w-auto mx-3">Remand Details</legend>
+
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <label for="date_from" class="control-label">Remand time start</label>
+                                        <input type="date" class="form-control form-control-sm rounded-0" name="date_from" value="<?= isset($date_from) ? date("Y-m-d", strtotime($date_from)) : "" ?>">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </fieldset>
+                        <fieldset class="border px-2 py-2" id='case-details'>
+                            <legend class="w-auto mx-3">Case Details</legend>
+                            <input hidden name='status' value='1' id='status-sentenced' />
+
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <label for="crime_ids" class="control-label">Crime Committed</label>
+                                        <select class="form-control form-control-sm rounded-0" name="crime_ids[]" id="crime_ids" multiple>
+                                            <?php
+                                            $crimes = $conn->query("SELECT * FROM `crime_list` where delete_flag = 0 and `status` = 1 order by `name` asc ");
+                                            while ($row = $crimes->fetch_assoc()) :
+                                            ?>
+                                                <option value="<?= $row['id'] ?>" <?= isset($crime_ids) && is_array($crime_ids) && in_array($row['id'], $crime_ids) ? 'selected' : '' ?>><?= $row['name'] ?></option>
+                                            <?php endwhile; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <label for="sentence" class="control-label">Sentence</label>
+                                        <div style='display: flex; '>
+                                            <input type="sentence" class="form-control form-control-sm rounded-0" name="sentence" id="sentence" value="<?= isset($sentence) ? $sentence : "" ?>">
+                                            <select style='margin-left: 2rem;' name="duration" id="duration">
+                                                <option value="<?= isset($duration) ? $duration : "" ?>" selected><?= isset($duration) ? $duration : "--Select time frame--" ?></option>
+                                                <option value="hrs">Hours</option>
+                                                <option value="days">Days</option>
+                                                <option value="weeks">Weeks</option>
+                                                <option value="months">Months</option>
+                                                <option value="yrs">Years</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sentence" class="control-label">How do you count the days?</label>
+                                        <div style='display: flex; '>
+
+                                            <select style='margin-left: 2rem;' name="count" id="count">
+                                                <option value="<?= isset($count) ? $count : "" ?>" selected><?= isset($count) ? $count . ' hours' : "--Select time frame--" ?></option>
+                                                <option value="12">12 hours</option>
+                                                <option value="24">24 hours</option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <label for="date_from" class="control-label">Time Serve Start</label>
+                                        <input type="date" class="form-control form-control-sm rounded-0" name="date_from" id="date_from" value="<?= isset($date_from) ? date("Y-m-d", strtotime($date_from)) : "" ?>">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <label for="date_to" class="control-label">Time Serve Ends</label>
+                                        <input type="date" readonly class="form-control form-control-sm rounded-0" name="date_to" id="date_to" value="<?= isset($date_to) ? date("Y-m-d", strtotime($date_to)) : "" ?>">
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="border px-2 py-2">
+                            <legend class="w-auto mx-3">Next of kin</legend>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <label for="emergency_name" class="control-label">Name</label>
+                                        <input type="emergency_name" class="form-control form-control-sm rounded-0" name="emergency_name" id="emergency_name" value="<?= isset($emergency_name) ? $emergency_name : "" ?>">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <label for="emergency_relation" class="control-label">Relation</label>
+                                        <input type="text" class="form-control form-control-sm rounded-0" name="emergency_relation" id="emergency_relation" value="<?= isset($emergency_relation) ? $emergency_relation : "" ?>">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <label for="emergency_contact" class="control-label">Contact #</label>
+                                        <input type="text" class="form-control form-control-sm rounded-0" name="emergency_contact" id="emergency_contact" value="<?= isset($emergency_contact) ? $emergency_contact : "" ?>">
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="border px-2 py-2">
+                            <legend class="w-auto mx-3">Image</legend>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <label for="" class="control-label">Inamate Image</label>
+                                        <div class="custom-file custom-file-sm rounded-0">
+                                            <input type="file" class="custom-file-input rounded-0" id="customFile1" name="img" onchange="displayImg(this)">
+                                            <label class="custom-file-label rounded-0" for="customFile1">Choose file</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="form-group">
+                                        <img src="<?php echo validate_image(isset($image_path) ? $image_path : '') ?>" alt="" id="cimg" class="img-fluid img-thumbnail">
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+            <div class="card-footer py-1 text-center">
+                <button class="btn btn-flat btn-sm btn-navy bg-gradient-navy" form="inmate-form"><i class="fa fa-save"></i> Save</button>
+                <?php if (!isset($id)) : ?>
+                    <a class="btn btn-flat btn-sm btn-light bg-gradient-light border" href="./?page=inmates"><i class="fa fa-angle-left"></i> Cancel</a>
+                <?php else : ?>
+                    <a class="btn btn-flat btn-sm btn-light bg-gradient-light border" href="./?page=inmates/view_inmate&id=<?= isset($id) ? $id : '' ?>"><i class="fa fa-angle-left"></i> Cancel</a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let checkbox_remand = document.querySelector("#remand")
+    let remand = document.querySelector("#remand-details")
+    let case_details = document.querySelector("#case-details")
+    let date_from_case_details = document.querySelector("#date_from")
+
+    let status_remand = document.querySelector("#status-remand")
+    let status_sentenced = document.querySelector("#status-sentenced")
+
+    let status = '<?php echo isset($status) ? $status : 0 ?>'
+
+    if (status == 2) {
+        checkbox_remand.checked = true
+        remand.style.display = 'block'
+        case_details.style.display = 'none'
+        status_sentenced.setAttribute("disabled", true)
+    }
+
+    checkbox_remand.addEventListener('click', toggle)
+
+    function toggle(e) {
+        if (e.target.checked == true) {
+            // Display remand details, hide case details and disable date_from field in case details
+            remand.style.display = 'block'
+            case_details.style.display = 'none'
+            date_from_case_details.setAttribute("disabled", true)
+            status_sentenced.setAttribute("disabled", true)
+
+        } else {
+            // Display case details and hide remand
+            remand.style.display = 'none'
+            case_details.style.display = 'block'
+            date_from_case_details.removeAttribute("disabled")
+            status_remand.setAttribute("disabled", true)
+            status_sentenced.removeAttribute("disabled")
+
+        }
+    }
+</script>
+<script>
+    $(document).ready(function() {
+
+        $('#cell_id').change(function(e) {
+            // e.preventDefault();
+            var cell = e.target.value
+            var prison = $('#prison_id')[0].value
+            var code = $("#code")
+
+            $.ajax({
+                url: _base_url_ + 'classes/generateCode.php',
+                data: {
+                    cell_id: cell,
+                    prison_id: prison
+                },
+                type: "GET",
+                error: err => {
+                    console.log('Error: ', err)
+                    alert_toast(err, 'error');
+                    end_loader();
+                },
+                success: function(resp) {
+                    code[0].value = resp
+                    console.log(resp)
+                }
+            })
+        })
+    })
+
+    // }
+</script>
+<script>
+    let sentence = document.querySelector('#sentence')
+    let date_from = document.querySelector('#date_from')
+    let date_to = document.querySelector('#date_to')
+    let duration = document.querySelector('#duration')
+    let count = document.querySelector('#count')
+
+    let statusOnEdit = '<?php echo isset($status) ? $status : 0 ?>'
+
+
+    var newTime;
+    var currentDate;
+    var timeAdded
+
+    date_from.addEventListener('change', setFinalDate)
+
+
+    function setFinalDate() {
+        switch (duration.value) {
+            case 'hrs':
+                timeAdded = (sentence.value * 60 * 60 * 1000)
+                currentDate = new Date(date_from.value)
+                newTime = new Date(currentDate.getTime() + timeAdded)
+
+                console.log("sentence", sentence.value)
+                console.log(newTime)
+                // Set date to
+                if ((newTime.getMonth() + 1) < 10) {
+                    return date_to.value = newTime.getFullYear() + '/' + '0' + (newTime.getMonth() + 1) + '/' + newTime.getDate()
+
+                } else {
+                    return date_to.value = newTime.getFullYear() + '/' + (newTime.getMonth() + 1) + '/' + newTime.getDate()
+
+                }
+                case "days":
+                    timeAdded = (sentence.value * (count.value) * 60 * 60 * 1000)
+                    currentDate = new Date(date_from.value)
+                    newTime = new Date(currentDate.getTime() + timeAdded)
+
+                    // Set date to
+                    if ((newTime.getMonth() + 1) < 10 && (newTime.getDate()) < 10) {
+                        return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                    } else if ((newTime.getMonth() + 1) < 10) {
+                        return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                    } else if ((newTime.getDate()) < 10) {
+                        return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                    } else {
+                        return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                    }
+                    case "weeks":
+                        timeAdded = (sentence.value * 7 * (count.value) * 60 * 60 * 1000)
+                        currentDate = new Date(date_from.value)
+                        newTime = new Date(currentDate.getTime() + timeAdded)
+
+                        console.log(newTime)
+                        // Set date to
+                        if ((newTime.getMonth() + 1) < 10 && (newTime.getDate()) < 10) {
+                            return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                        } else if ((newTime.getMonth() + 1) < 10) {
+                            return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                        } else if ((newTime.getDate()) < 10) {
+                            return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                        } else {
+                            return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                        }
+                        case "months":
+                            timeAdded = (sentence.value * 30 * (count.value) * 60 * 60 * 1000)
+                            currentDate = new Date(date_from.value)
+                            newTime = new Date(currentDate.getTime() + timeAdded)
+
+                            console.log(newTime)
+                            // Set date to
+                            if ((newTime.getMonth() + 1) < 10 && (newTime.getDate()) < 10) {
+                                return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                            } else if ((newTime.getMonth() + 1) < 10) {
+                                return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                            } else if ((newTime.getDate()) < 10) {
+                                return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                            } else {
+                                return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                            }
+                            case "yrs":
+                                timeAdded = (sentence.value * 365 * (count.value) * 60 * 60 * 1000)
+                                currentDate = new Date(date_from.value)
+                                newTime = new Date(currentDate.getTime() + timeAdded)
+
+                                console.log(count.value)
+                                // Set date to
+                                if ((newTime.getMonth() + 1) < 10 && (newTime.getDate()) < 10) {
+                                    return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                                } else if ((newTime.getMonth() + 1) < 10) {
+                                    return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                                } else if ((newTime.getDate()) < 10) {
+                                    return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                                } else {
+                                    return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                                }
+                                default:
+                                    return console.log('Failed')
+        }
+    }
+
+    // Change date according to duration and sentence
+
+    if (statusOnEdit == 2) {
+        count.addEventListener('change', settleRemandFinalDate)
+
+        function settleRemandFinalDate() {
+            switch (duration.value) {
+                case 'hrs':
+                    timeAdded = (sentence.value * 60 * 60 * 1000)
+                    currentDate = new Date(date_from.value)
+                    newTime = new Date(currentDate.getTime() + timeAdded)
+
+                    console.log("sentence", sentence.value)
+                    console.log(newTime)
+                    // Set date to
+                    if ((newTime.getMonth() + 1) < 10) {
+                        return date_to.value = newTime.getFullYear() + '/' + '0' + (newTime.getMonth() + 1) + '/' + newTime.getDate()
+
+                    } else {
+                        return date_to.value = newTime.getFullYear() + '/' + (newTime.getMonth() + 1) + '/' + newTime.getDate()
+
+                    }
+                    case "days":
+                        timeAdded = (sentence.value * (count.value) * 60 * 60 * 1000)
+                        currentDate = new Date(date_from.value)
+                        newTime = new Date(currentDate.getTime() + timeAdded)
+
+                        // Set date to
+                        if ((newTime.getMonth() + 1) < 10 && (newTime.getDate()) < 10) {
+                            return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                        } else if ((newTime.getMonth() + 1) < 10) {
+                            return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                        } else if ((newTime.getDate()) < 10) {
+                            return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                        } else {
+                            return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                        }
+                        case "weeks":
+                            timeAdded = (sentence.value * 7 * (count.value) * 60 * 60 * 1000)
+                            currentDate = new Date(date_from.value)
+                            newTime = new Date(currentDate.getTime() + timeAdded)
+
+                            console.log(newTime)
+                            // Set date to
+                            if ((newTime.getMonth() + 1) < 10 && (newTime.getDate()) < 10) {
+                                return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                            } else if ((newTime.getMonth() + 1) < 10) {
+                                return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                            } else if ((newTime.getDate()) < 10) {
+                                return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                            } else {
+                                return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                            }
+                            case "months":
+                                timeAdded = (sentence.value * 30 * (count.value) * 60 * 60 * 1000)
+                                currentDate = new Date(date_from.value)
+                                newTime = new Date(currentDate.getTime() + timeAdded)
+
+                                console.log(newTime)
+                                // Set date to
+                                if ((newTime.getMonth() + 1) < 10 && (newTime.getDate()) < 10) {
+                                    return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                                } else if ((newTime.getMonth() + 1) < 10) {
+                                    return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                                } else if ((newTime.getDate()) < 10) {
+                                    return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                                } else {
+                                    return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                                }
+                                case "yrs":
+                                    timeAdded = (sentence.value * 365 * (count.value) * 60 * 60 * 1000)
+                                    currentDate = new Date(date_from.value)
+                                    newTime = new Date(currentDate.getTime() + timeAdded)
+
+                                    console.log(count.value)
+                                    // Set date to
+                                    if ((newTime.getMonth() + 1) < 10 && (newTime.getDate()) < 10) {
+                                        return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                                    } else if ((newTime.getMonth() + 1) < 10) {
+                                        return date_to.value = newTime.getFullYear() + '-' + '0' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                                    } else if ((newTime.getDate()) < 10) {
+                                        return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + '0' + newTime.getDate()
+
+                                    } else {
+                                        return date_to.value = newTime.getFullYear() + '-' + (newTime.getMonth() + 1) + '-' + newTime.getDate()
+
+                                    }
+                                    default:
+                                        return console.log('Failed')
+            }
+        }
+    }
+</script>
+<script>
+    function displayImg(input, _this) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $('#cimg').attr('src', e.target.result);
+                $(input).siblings('.custom-file-label').html(input.files[0].name)
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            $('#cimg').attr('src', "<?php echo validate_image(isset($image_path) ? $image_path : '') ?>");
+            $(input).siblings('.custom-file-label').html('Choose file')
+        }
+    }
+    $(document).ready(function() {
+
+        let remand_checkbox = $('#remand')[0].checked
+
+        if (!remand_checkbox) {
+
+            // Disable date from field in details case
+            $('#crime_ids').select2({
+                placeholder: "Please select inmate crimes here",
+                width: '100%',
+                containerCssClass: 'rounded-0 rounded-0 pb-2'
+            })
+        }
+        // $('#cell_id').select2({
+        //     placeholder: "Please select inmate cell block here",
+        //     width: '100%',
+        //     containerCssClass: 'form-control form-control-sm rounded-0'
+        // })
+        $('#inmate-form').submit(function(e) {
+            e.preventDefault();
+            var _this = $(this)
+            console.log(_this)
+            $('.err-msg').remove();
+            var el = $('<div>')
+            el.addClass('alert alert-danger rounded-0 err-msg')
+            el.hide()
+            start_loader();
+            $.ajax({
+                url: _base_url_ + "classes/Master.php?f=save_inmate",
+                data: new FormData($(this)[0]),
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST',
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    alert_toast("An error occured", 'error');
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        location.replace("./?page=inmates/view_inmate&id=" + resp.iid)
+                    } else if (resp.status == 'failed' && !!resp.msg) {
+                        el.text(resp.msg)
+                        _this.prepend(el)
+                        el.show('slow')
+                        $("html, body").scrollTop(0);
+                    } else {
+                        alert_toast("An error occured", 'error');
+                    }
+                    end_loader()
+                }
+            })
+        })
+
+    })
+</script>
